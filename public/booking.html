@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Room | Malenadu Resort</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html"><img src="logo.png" alt="Logo" width="40" height="40" class="me-2 rounded-circle bg-white p-1">Malenadu Resort</a>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <h2 class="text-center mb-4">Confirm Your Booking</h2>
+                        <div id="room-details" class="mb-4 p-3 bg-white border rounded">
+                            <!-- Room details loaded here -->
+                        </div>
+                        <form id="booking-form">
+                            <div class="mb-3">
+                                <label for="room-select" class="form-label">Select Room</label>
+                                <select class="form-select" id="room-select" required>
+                                    <option value="">Loading available rooms...</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="check-in" class="form-label">Check-in Date</label>
+                                    <input type="date" class="form-control" id="check-in" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="check-out" class="form-label">Check-out Date</label>
+                                    <input type="date" class="form-control" id="check-out" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <h5>Total Price: <span id="total-price" class="text-primary">$0</span></h5>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-lg w-100">Confirm Booking</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        let selectedRoomId = urlParams.get('roomId');
+        let roomPrice = 0;
+        let allRooms = [];
+
+        async function loadRooms() {
+            try {
+                const res = await fetch(`/api/rooms`);
+                allRooms = await res.json();
+                const roomSelect = document.getElementById('room-select');
+                
+                const availableRooms = allRooms.filter(r => r.status === 'available' || r._id === selectedRoomId);
+                
+                roomSelect.innerHTML = availableRooms.map(r => `
+                    <option value="${r._id}" ${r._id === selectedRoomId ? 'selected' : ''}>
+                        Room ${r.roomNumber} - ${r.roomType} ($${r.price}/night)
+                    </option>
+                `).join('');
+
+                updateRoomDetails(selectedRoomId);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function updateRoomDetails(id) {
+            const room = allRooms.find(r => r._id === id);
+            if (room) {
+                selectedRoomId = room._id;
+                roomPrice = room.price;
+                document.getElementById('room-details').innerHTML = `
+                    <h4>${room.roomType}</h4>
+                    <p>Room Number: ${room.roomNumber} | Price per Night: $${room.price}</p>
+                `;
+                calculateTotal();
+            }
+        }
+
+        document.getElementById('room-select').addEventListener('change', (e) => {
+            updateRoomDetails(e.target.value);
+        });
+
+        document.getElementById('check-out').addEventListener('change', calculateTotal);
+        document.getElementById('check-in').addEventListener('change', calculateTotal);
+
+        function calculateTotal() {
+            const checkInVal = document.getElementById('check-in').value;
+            const checkOutVal = document.getElementById('check-out').value;
+            if (checkInVal && checkOutVal) {
+                const checkIn = new Date(checkInVal);
+                const checkOut = new Date(checkOutVal);
+                if (checkOut > checkIn) {
+                    const diffTime = Math.abs(checkOut - checkIn);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const total = diffDays * roomPrice;
+                    document.getElementById('total-price').innerText = `$${total}`;
+                    return total;
+                }
+            }
+            document.getElementById('total-price').innerText = `$0`;
+            return 0;
+        }
+
+        document.getElementById('booking-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = JSON.parse(localStorage.getItem('user'));
+            const totalPrice = calculateTotal();
+            const checkIn = document.getElementById('check-in').value;
+            const checkOut = document.getElementById('check-out').value;
+
+            if (totalPrice === 0) {
+                alert('Please select valid dates');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user._id, roomId: selectedRoomId, checkIn, checkOut, totalPrice })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`Booking successful! Your Booking ID is: ${data.bookingId}`);
+                    window.location.href = `billing.html?bookingId=${data.bookingId}`;
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        loadRooms();
+    </script>
+</body>
+</html>

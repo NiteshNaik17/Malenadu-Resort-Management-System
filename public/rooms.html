@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rooms | Malenadu Resort</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="rooms-page">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html"><img src="logo.png" alt="Logo" width="40" height="40" class="me-2 rounded-circle bg-white p-1">Malenadu Resort</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="rooms.html">Rooms</a></li>
+                    <li class="nav-item"><a class="nav-link" href="query.html">Contact Us</a></li>
+                    <li class="nav-item d-none" id="nav-food"><a class="nav-link" href="food.html">Food Menu</a></li>
+                    <li class="nav-item" id="nav-login"><a class="nav-link" href="login.html">Login</a></li>
+                    <li class="nav-item d-none" id="nav-logout"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Available Rooms</h2>
+        
+        <!-- Search and Filter -->
+        <div class="row mb-4 justify-content-center">
+            <div class="col-md-4 mb-2">
+                <input type="text" id="search-input" class="form-control" placeholder="Search Room Number...">
+            </div>
+            <div class="col-md-3 mb-2">
+                <select id="type-filter" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="Single">Single</option>
+                    <option value="Double">Double</option>
+                    <option value="Suite">Suite</option>
+                    <option value="Deluxe">Deluxe</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row" id="rooms-container">
+            <!-- Rooms will be loaded here -->
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Check if user is logged in
+        if (!localStorage.getItem('user')) {
+            window.location.href = 'login.html';
+        }
+        let allRooms = [];
+
+        async function loadRooms() {
+            try {
+                const res = await fetch('/api/rooms');
+                allRooms = await res.json();
+                displayRooms(allRooms);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function displayRooms(rooms) {
+            const container = document.getElementById('rooms-container');
+            if (rooms.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center text-muted">No rooms found matching your criteria.</div>';
+                return;
+            }
+
+            // Sort rooms: available first, then others
+            const sortedRooms = [...rooms].sort((a, b) => {
+                if (a.status === 'available' && b.status !== 'available') return -1;
+                if (a.status !== 'available' && b.status === 'available') return 1;
+                return 0;
+            });
+
+            container.innerHTML = sortedRooms.map(room => {
+                let imageUrl = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"; // Default
+                if (room.roomType === 'Single') imageUrl = "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
+                if (room.roomType === 'Double') imageUrl = "https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
+                if (room.roomType === 'Suite') imageUrl = "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
+                if (room.roomType === 'Deluxe') imageUrl = "https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
+
+                return `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <img src="${imageUrl}" class="card-img-top" alt="${room.roomType}">
+                        <div class="card-body">
+                            <h5 class="card-title">${room.roomType}</h5>
+                            <p class="card-text text-muted small">Room ${room.roomNumber}</p>
+                            <p class="card-text text-primary fw-bold h5">$${room.price} <span class="small text-muted">/ night</span></p>
+                            <p class="card-text">
+                                <span class="badge ${room.status === 'available' ? 'bg-success' : 'bg-danger'}">${room.status.toUpperCase()}</span>
+                            </p>
+                            <button onclick="bookRoom('${room._id}')" class="btn ${room.status === 'available' ? 'btn-primary' : 'btn-secondary'} w-100 mt-2" ${room.status !== 'available' ? 'disabled' : ''}>
+                                ${room.status === 'available' ? 'Book Now' : 'Occupied'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function filterRooms() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const type = document.getElementById('type-filter').value;
+            
+            const filtered = allRooms.filter(room => {
+                const matchesSearch = room.roomNumber.toLowerCase().includes(search);
+                const matchesType = type === "" || room.roomType === type;
+                return matchesSearch && matchesType;
+            });
+            
+            displayRooms(filtered);
+        }
+
+        document.getElementById('search-input').addEventListener('input', filterRooms);
+        document.getElementById('type-filter').addEventListener('change', filterRooms);
+
+        function bookRoom(roomId) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                alert('Please login to book a room');
+                window.location.href = 'login.html';
+                return;
+            }
+            window.location.href = `booking.html?roomId=${roomId}`;
+        }
+
+        loadRooms();
+    </script>
+</body>
+</html>

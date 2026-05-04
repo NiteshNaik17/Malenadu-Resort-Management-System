@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Reservation System | Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="logo.png" alt="Logo" width="40" height="40" class="me-2 rounded-circle bg-white p-1">
+                Malenadu Resort
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item d-none"><a class="nav-link" href="rooms.html">Rooms</a></li>
+                    <li class="nav-item d-none"><a class="nav-link" href="query.html">Contact Us</a></li>
+                    <li class="nav-item d-none" id="nav-food"><a class="nav-link" href="food.html">Food Menu</a></li>
+                    <li class="nav-item" id="nav-login"><a class="nav-link" href="login.html">Login</a></li>
+                    <li class="nav-item" id="nav-register"><a class="nav-link" href="register.html">Register</a></li>
+                    <li class="nav-item d-none" id="nav-admin"><a class="nav-link" href="admin.html">Admin</a></li>
+                    <li class="nav-item d-none" id="nav-logout"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section text-center text-white d-flex align-items-center">
+        <div class="container">
+            <h1 class="display-3 fw-bold">Welcome to Malenadu Resort</h1>
+            <p class="lead">Experience luxury and comfort like never before.</p>
+            <a href="rooms.html" class="btn btn-primary btn-lg mt-3">Book Now</a>
+        </div>
+    </header>
+
+    <!-- About Us Section -->
+    <section class="py-5 bg-light">
+        <div class="container text-center">
+            <h2 class="mb-4">Why Choose Malenadu Resort?</h2>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="p-4 bg-white shadow-sm rounded h-100">
+                        <i class="bi bi-star-fill text-warning h1"></i>
+                        <h4>Premium Luxury</h4>
+                        <p class="text-muted">Enjoy our world-class amenities and premium services designed for your ultimate comfort.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="p-4 bg-white shadow-sm rounded h-100">
+                        <i class="bi bi-geo-alt-fill text-danger h1"></i>
+                        <h4>Prime Location</h4>
+                        <p class="text-muted">Located in the heart of the city, giving you easy access to major attractions and business hubs.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="p-4 bg-white shadow-sm rounded h-100">
+                        <i class="bi bi-shield-check text-success h1"></i>
+                        <h4>Safe & Secure</h4>
+                        <p class="text-muted">Your safety is our priority. With 24/7 security and advanced safety protocols, rest easy with us.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5">
+                <p class="lead text-secondary">
+                    At Malenadu Resort, we redefine hospitality. Whether you're here for a business trip or a relaxing vacation, our dedicated team is here to ensure your stay is nothing short of extraordinary. From our award-winning restaurant to our state-of-the-art spa, every detail is crafted with you in mind.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-4">
+        <p>&copy; 2026 Malenadu Resort Reservation System</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        async function loadContent() {
+            // Content loading removed
+        }
+        document.addEventListener('DOMContentLoaded', loadContent);
+    </script>
+</body>
+</html>

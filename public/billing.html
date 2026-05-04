@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing | Malenadu Resort</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html"><img src="logo.png" alt="Logo" width="40" height="40" class="me-2 rounded-circle bg-white p-1">Malenadu Resort</a>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h3>Booking Receipt</h3>
+                    </div>
+                    <div class="card-body p-5">
+                        <div id="billing-details">
+                            <!-- Billing details loaded here -->
+                        </div>
+                        <hr>
+                        <form id="payment-form">
+                            <h5 class="mb-3">Select Payment Method</h5>
+                            <div class="mb-3">
+                                <select class="form-select" id="payment-method" required>
+                                    <option value="">Choose...</option>
+                                    <option value="Credit Card">Credit Card</option>
+                                    <option value="Debit Card">Debit Card</option>
+                                    <option value="PayPal">PayPal</option>
+                                    <option value="Cash">Cash</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-lg">Complete Payment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlBookingId = urlParams.get('bookingId');
+        let totalAmount = 0;
+        let dbBookingId = null;
+
+        async function loadBillingDetails() {
+            try {
+                const res = await fetch(`/api/bookings`);
+                const bookings = await res.json();
+                const booking = bookings.find(b => b.bookingId === urlBookingId);
+                if (booking) {
+                    dbBookingId = booking._id;
+                    totalAmount = booking.totalPrice;
+                    document.getElementById('billing-details').innerHTML = `
+                        <div class="row mb-3">
+                            <div class="col-6 text-muted">Booking ID:</div>
+                            <div class="col-6 fw-bold">${booking.bookingId}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6 text-muted">Customer Name:</div>
+                            <div class="col-6 fw-bold">${booking.userId ? booking.userId.name : 'Guest'}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6 text-muted">Room Type:</div>
+                            <div class="col-6 fw-bold">${booking.roomId ? booking.roomId.roomType : 'N/A'}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6 text-muted">Check-in:</div>
+                            <div class="col-6 fw-bold">${new Date(booking.checkIn).toDateString()}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6 text-muted">Check-out:</div>
+                            <div class="col-6 fw-bold">${new Date(booking.checkOut).toDateString()}</div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-6 text-muted">Total Cost:</div>
+                            <div class="col-6 fw-bold text-primary h4">$${booking.totalPrice}</div>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.getElementById('payment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const paymentMethod = document.getElementById('payment-method').value;
+
+            try {
+                const res = await fetch('/api/payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId: dbBookingId, amount: totalAmount, paymentMethod })
+                });
+                if (res.ok) {
+                    alert('Payment successful! Thank you for your booking.');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Payment failed. Please try again.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        loadBillingDetails();
+    </script>
+</body>
+</html>
