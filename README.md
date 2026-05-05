@@ -80,4 +80,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests to i
 This project is licensed under the ISC License.
 
 ---
-Developed with ❤️ by [Nitesh Naik](https://github.com/NiteshNaik17)
+Developed by [Nitesh Naik](https://github.com/NiteshNaik17)
