@@ -8,3 +8,11 @@ build/
 package-lock.json
 java_threads/
 java_threads.jar
+git-min/
+git-portable/
+git-min.zip
+git-portable.exe
+git-min_tmp/
+git-portable_tmp/
+*.zip
+*.exe
